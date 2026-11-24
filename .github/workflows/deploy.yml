@@ -20,7 +20,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build
+      - run: npm run build -- --base=/Portfolio/
       # Give every route its own HTML file so direct links and refreshes
       # return 200 (GitHub Pages serves /identity from identity.html).
       # 404.html catches anything else, such as old /work/... links.

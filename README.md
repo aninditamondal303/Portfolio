@@ -13,7 +13,7 @@ npm run preview    # serve the production build
 
 ## Pages
 
-Live at **https://aninditamondal303.github.io**
+Live at **https://aninditamondal303.github.io/Portfolio/**
 
 | Route | What it is |
 |---|---|
@@ -31,7 +31,7 @@ Ctrl/Cmd+K opens the map on every page.
 
 ## Deployment
 
-Every push to `main` builds the site and publishes it to GitHub Pages (`.github/workflows/deploy.yml`). The workflow copies `index.html` to `404.html` so direct links and refreshes on nested routes load the app.
+Every push to `main` builds the site with `--base=/Portfolio/` and publishes it to GitHub Pages (`.github/workflows/deploy.yml`). The workflow copies `index.html` to `404.html` so direct links and refreshes on nested routes load the app.
 
 ## Updating content
 

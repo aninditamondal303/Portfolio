@@ -37,7 +37,7 @@ export const profile = {
     linkedinLabel: 'linkedin.com/in/anindita-mondal-931b61355',
     github: 'https://github.com/aninditamondal303',
     githubLabel: 'github.com/aninditamondal303',
-    resume: '/Anindita_Mondal_Resume.pdf',
+    resume: `${import.meta.env.BASE_URL}Anindita_Mondal_Resume.pdf`,
   },
 
   /**

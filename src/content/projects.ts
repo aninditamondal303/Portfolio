@@ -82,7 +82,7 @@ export interface Project {
 
 const GH = 'https://github.com/aninditamondal303';
 const img = (slug: string, n: number, alt: string, width: number, height: number): Shot => ({
-  src: `/images/projects/${slug}/${String(n).padStart(2, '0')}.webp`,
+  src: `${import.meta.env.BASE_URL}images/projects/${slug}/${String(n).padStart(2, '0')}.webp`,
   alt,
   width,
   height,
@@ -430,8 +430,8 @@ export const projects: Project[] = [
       { label: 'How it works (in the app)', url: 'https://aninditamondal303.github.io/NaadAI/#how-it-works' },
     ],
     demo: {
-      src: '/images/projects/naad-ai/demo.mp4',
-      poster: '/images/projects/naad-ai/demo-poster.webp',
+      src: `${import.meta.env.BASE_URL}images/projects/naad-ai/demo.mp4`,
+      poster: `${import.meta.env.BASE_URL}images/projects/naad-ai/demo-poster.webp`,
       width: 300,
       height: 650,
       caption:
