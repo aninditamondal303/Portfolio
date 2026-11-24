@@ -21,8 +21,17 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      # Lets direct links like /work/naad-ai load on GitHub Pages.
-      - run: cp dist/index.html dist/404.html
+      # Give every route its own HTML file so direct links and refreshes
+      # return 200 (GitHub Pages serves /identity from identity.html).
+      # 404.html catches anything else, such as old /work/... links.
+      - name: Route files
+        run: |
+          cp dist/index.html dist/404.html
+          for r in universe identity process exhibition elsewhere contact brief \
+                   exhibition/triscan exhibition/naadai exhibition/api-sentinel; do
+            mkdir -p "dist/$(dirname "$r")"
+            cp dist/index.html "dist/$r.html"
+          done
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
