@@ -1,0 +1,844 @@
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------
+   Design tokens. Change a colour here and it updates everywhere.
+   --------------------------------------------------------------- */
+@theme {
+  /* Swiss-editorial system: warm paper, near-black ink, one vermilion signal.
+     (Token names are kept from the first version so every component follows.) */
+  --color-plum: #121211; /* ink surface */
+  --color-plum-soft: #262624;
+  --color-coral: #ff5b38; /* signal: fills, and text on ink */
+  --color-coral-deep: #b93416; /* signal dark enough for text on paper (AA) */
+  --color-lavender: #b8b4aa;
+  --color-lavender-pale: #e2dfd7;
+  --color-gold: #cdc8bb;
+  --color-gold-pale: #e9e6de;
+  --color-celadon: #a8a499;
+  --color-celadon-pale: #dddad2;
+  --color-ivory: #eeebe4;
+  --color-paper: #f4f2ec;
+  --color-ink: #121211;
+  --color-ink-muted: #56534c;
+
+  --font-serif: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'Inter Tight Variable', 'Inter Tight', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* Laya: one matra (beat) and the easing every reveal uses. */
+  --beat: 0.12s;
+  --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---------------------------------------------------------------
+   Base
+   --------------------------------------------------------------- */
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 5rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-coral);
+  color: var(--color-plum);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-coral-deep);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.on-dark :focus-visible {
+  outline-color: var(--color-coral);
+}
+
+/* Faint paper grain. A tiny inline SVG, no image request. */
+.grain {
+  position: relative;
+  isolation: isolate;
+}
+.grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.16 0 0 0 0 0.14 0 0 0 0 0.18 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------------------------------------------------------------
+   Typography helpers
+   --------------------------------------------------------------- */
+.display {
+  font-family: var(--font-sans);
+  font-weight: 620;
+  line-height: 0.88;
+  letter-spacing: -0.045em;
+}
+/* Editorial contrast: italics inside display type are set in the serif. */
+.display em,
+.serif {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 100% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.4s var(--ease-editorial);
+}
+.link-underline:hover {
+  background-size: 0% 1px;
+  background-position: 100% 100%;
+}
+
+/* Scroll reveals. Only active when motion is allowed and JavaScript runs
+   (main.tsx adds .js-motion); otherwise everything is simply visible. */
+/* Laya: reveals move in whole beats. data-beat="n" delays an element by n
+   matras, so a group lands in a counted rhythm (1, 2, 3, 4 · the vibhag of
+   tintal) instead of one uniform fade. Durations are 6 and 8 beats. */
+.js-motion [data-reveal]:not([data-reveal='lines']) {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity calc(var(--beat) * 6) var(--ease-editorial),
+    transform calc(var(--beat) * 8) var(--ease-editorial);
+  transition-delay: calc(var(--beat) * var(--n, 0));
+}
+.js-motion [data-reveal='lines'] [data-line] {
+  transform: translateY(105%);
+  transition: transform calc(var(--beat) * 8) var(--ease-editorial);
+}
+.js-motion [data-reveal='lines'] > span:nth-child(2) [data-line] {
+  transition-delay: var(--beat);
+}
+[data-beat='1'] {
+  --n: 1;
+}
+[data-beat='2'] {
+  --n: 2;
+}
+[data-beat='3'] {
+  --n: 3;
+}
+[data-beat='4'] {
+  --n: 4;
+}
+.js-motion [data-reveal].is-in,
+.js-motion [data-reveal].is-in [data-line] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Print: the recruiter view prints as a clean one-pager. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #fff;
+    font-size: 11pt;
+  }
+  a {
+    text-decoration: none;
+  }
+}
+
+/* Respect reduced motion everywhere, including hover transitions. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* The opening screen animates with CSS only, so it paints immediately
+   without waiting for any JavaScript. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-line {
+    animation: hero-rise 1.1s var(--ease-editorial) both;
+  }
+  .hero-line-2 {
+    animation-delay: 0.12s;
+  }
+  [data-hero] {
+    animation: hero-fade 0.9s var(--ease-editorial) 0.35s both;
+  }
+}
+@keyframes hero-rise {
+  from {
+    transform: translateY(105%);
+  }
+}
+@keyframes hero-fade {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+/* ---------------------------------------------------------------
+   Blueprint: the design system made visible.
+   - html.blueprint: the whole homepage annotated (header switch, Ctrl+K).
+   --------------------------------------------------------------- */
+:root {
+  --bp-ink: #e6eef7;
+  --bp-bg: #1f3f5f;
+  --bp-line: rgba(230, 238, 247, 0.55);
+}
+
+/* Spec labels on annotated elements */
+[data-spec] {
+  position: relative;
+}
+html.blueprint main [data-spec] {
+  outline: 1px dashed var(--bp-line);
+  outline-offset: 2px;
+}
+html.blueprint main [data-spec] {
+  outline-color: #3d6f9e;
+}
+html.blueprint main [data-spec]::after {
+  content: attr(data-spec);
+  position: absolute;
+  left: 0;
+  top: -1.45rem;
+  z-index: 5;
+  padding: 0.15rem 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  -webkit-text-stroke: 0;
+  color: #fff !important;
+  background: #3d6f9e !important;
+  pointer-events: none;
+}
+/* Global blueprint mode: column overlay + tinted page */
+html.blueprint main {
+  background-image:
+    linear-gradient(rgba(61, 111, 158, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61, 111, 158, 0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Layout-level specs (column spans) sit at the top-right corner, so they
+   never cover the text above them. */
+html.blueprint main [data-spec*='/ 12']::after {
+  left: auto;
+  right: 0;
+}
+
+/* Lines that draw when scrolled into view (the Contact resolution). */
+.js-motion [data-reveal='draw'] path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 2.6s 0.2s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.js-motion [data-reveal='draw'].is-in path {
+  stroke-dashoffset: 0;
+}
+
+/* Page transitions (View Transitions API, where supported). */
+@media (prefers-reduced-motion: no-preference) {
+  /* The space between worlds: every destination opens as a portal from the
+     exact point the visitor clicked (--vt-x / --vt-y, set in Layout), while
+     the previous world falls back into the dark. */
+  ::view-transition-old(root) {
+    animation: vt-recede 0.6s var(--ease-editorial) both;
+  }
+  ::view-transition-new(root) {
+    animation: vt-portal 0.75s var(--ease-editorial) both;
+  }
+  ::view-transition-group(*) {
+    animation-duration: calc(var(--beat) * 6);
+    animation-timing-function: var(--ease-editorial);
+  }
+}
+@keyframes vt-portal {
+  from {
+    clip-path: circle(0 at var(--vt-x, 50%) var(--vt-y, 50%));
+  }
+  to {
+    clip-path: circle(150vmax at var(--vt-x, 50%) var(--vt-y, 50%));
+  }
+}
+@keyframes vt-recede {
+  to {
+    transform: scale(0.94);
+    filter: brightness(0.35);
+  }
+}
+@keyframes vistar {
+  from {
+    clip-path: inset(42% 0 42% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes vt-out {
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+/* ---------------------------------------------------------------
+   Opening, navigation and exhibition motion (all reduced-motion safe)
+   --------------------------------------------------------------- */
+.name-breath [data-l] {
+  font-variation-settings: 'wght' 640;
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* Alap: the name breathes in from hairline to full weight, one beat per letter. */
+  .name-breath [data-l] {
+    animation: breathe calc(var(--beat) * 12) var(--ease-editorial) backwards;
+  }
+  .status-dot {
+    animation: pulse calc(var(--beat) * 16) ease-in-out infinite;
+  }
+  /* The chapter indicator rolls the new value in. */
+  .roll {
+    animation: roll calc(var(--beat) * 4) var(--ease-editorial);
+  }
+  .index-dialog[open] {
+    animation: index-in calc(var(--beat) * 4) var(--ease-editorial);
+  }
+  .index-dialog[open] [role='group'] {
+    animation: rise calc(var(--beat) * 6) var(--ease-editorial) backwards;
+  }
+  .index-dialog[open] [role='group']:nth-child(2) {
+    animation-delay: var(--beat);
+  }
+  .index-dialog[open] [role='group']:nth-child(3) {
+    animation-delay: calc(var(--beat) * 2);
+  }
+  .index-dialog[open] [role='group']:nth-child(4) {
+    animation-delay: calc(var(--beat) * 3);
+  }
+  .index-dialog[open] [role='group']:nth-child(5) {
+    animation-delay: calc(var(--beat) * 4);
+  }
+}
+@keyframes breathe {
+  from {
+    font-variation-settings: 'wght' 120;
+    opacity: 0.2;
+  }
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+@keyframes roll {
+  from {
+    transform: translateY(110%);
+    opacity: 0;
+  }
+}
+@keyframes index-in {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes rise {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+}
+/* Room for the thumb-zone bar on phones. */
+@media (max-width: 767px) {
+  body {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* Exhibition depth: in the scroll-locked gallery, text and specimen travel at
+   different speeds (--o is the panel's offset from centre, -1 to 1). */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .exhibition .panel-text {
+    transform: translateX(calc(var(--o, 0) * 9vw));
+    opacity: calc(1 - min(1, max(var(--o, 0), calc(-1 * var(--o, 0))) * 0.9));
+  }
+  .exhibition .panel-stage {
+    transform: translateX(calc(var(--o, 0) * -5vw))
+      scale(calc(1 - min(1, max(var(--o, 0), calc(-1 * var(--o, 0)))) * 0.06));
+  }
+}
+.exhibition [role='region'] ::-webkit-scrollbar,
+.exhibition ::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------------------------------------------------------------
+   Collage, kinetic type, studio (Collage.tsx, Kinetic.tsx, StudioDock.tsx)
+   --------------------------------------------------------------- */
+.hand {
+  font-family: 'Caveat', 'Bradley Hand', cursive;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.05;
+}
+.frag {
+  cursor: grab;
+  padding: 0;
+  background: none;
+  border: 0;
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.18));
+  text-align: left;
+}
+.frag:focus-visible {
+  outline-offset: 6px;
+}
+.frag.is-held {
+  cursor: grabbing;
+  z-index: 5;
+  filter: drop-shadow(0 26px 30px rgba(0, 0, 0, 0.3));
+}
+.frag-card {
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.frag.is-flipped .frag-card {
+  transform: rotateY(180deg);
+}
+.frag-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.frag-back {
+  transform: rotateY(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .frag-card {
+    transition: none;
+  }
+}
+
+/* Kinetic headings lean with scroll momentum. */
+@media (prefers-reduced-motion: no-preference) {
+  .kinetic {
+    transform: skewY(calc(var(--sv, 0) * -4deg));
+    transition: transform 0.2s linear;
+  }
+  .studio-panel {
+    animation: rise calc(var(--beat) * 3) var(--ease-editorial);
+  }
+}
+@keyframes jitter {
+  50% {
+    translate: 0 -2px;
+    rotate: -2deg;
+  }
+}
+
+/* Ghost words: monumental type set loose behind a room. */
+.ghost {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: -0.07em;
+  white-space: nowrap;
+  user-select: none;
+}
+/* Specimen frames ("Reframe" in the exhibition). */
+.specimen-frame {
+  transition:
+    transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+    border-radius 0.5s,
+    padding 0.5s,
+    background-color 0.5s;
+}
+.frame-polaroid {
+  background: #fff !important;
+  padding: 0.75rem 0.75rem 3.25rem;
+  transform: rotate(-3deg);
+}
+.frame-negative {
+  background: #000 !important;
+}
+.frame-porthole {
+  border-radius: 9999px;
+  aspect-ratio: 1;
+  max-height: 58vh;
+  margin-inline: auto;
+  padding: 0;
+  border: 10px solid currentColor;
+}
+.frame-porthole img {
+  height: 100%;
+  width: 100%;
+  max-height: none;
+  object-fit: cover;
+}
+.frame-tilt {
+  transform: rotate(7deg) translate(2%, 3%);
+}
+.tile {
+  transition:
+    rotate 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+    scale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.4s;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tile:hover {
+    rotate: 0deg !important;
+    scale: 1.03;
+    z-index: 2;
+    box-shadow: 10px 10px 0 #121211;
+  }
+}
+
+/* ===============================================================
+   Issue Nº 01: the cover, the worlds, and their instruments
+   =============================================================== */
+
+/* The cover name: one fragment is filled with a real scan from TriScan. */
+.cover-fill {
+  background-size: 160% auto;
+  background-position: 78% 45%;
+  background-color: #000;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--color-ink);
+}
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .cover-fill {
+    color: var(--color-ink);
+  }
+}
+
+/* Each world redefines the colour tokens (and some type) for everything
+   inside it: its spread in the issue and its own page. */
+[data-world='triscan-ai'] {
+  --color-paper: #04080c;
+  --color-ivory: #04080c;
+  --color-plum: #d6f5ec;
+  --color-ink: #d6f5ec;
+  --color-ink-muted: #8fb3a8;
+  --color-coral: #5cffc4;
+  --color-coral-deep: #5cffc4;
+  --color-lavender-pale: #0a1218;
+  --color-celadon-pale: #0a1218;
+  --color-gold-pale: #0a1218;
+  --sig: #5cffc4;
+  --alert: #ff5b38;
+  background: #04080c;
+  color: #d6f5ec;
+}
+[data-world='naad-ai'] {
+  --color-paper: #f3ead8;
+  --color-ivory: #f3ead8;
+  --color-plum: #1d1630;
+  --color-ink: #1d1630;
+  --color-ink-muted: #594d61;
+  --color-coral: #d9480f;
+  --color-coral-deep: #a8360a;
+  --color-lavender-pale: #eadfc8;
+  --color-celadon-pale: #eadfc8;
+  --color-gold-pale: #eadfc8;
+  --sig: #a8360a;
+  --ink: #1d1630;
+  background: #f3ead8;
+  color: #1d1630;
+}
+[data-world='api-sentinel'] {
+  --color-paper: #0b0f14;
+  --color-ivory: #0b0f14;
+  --color-plum: #d7e2ea;
+  --color-ink: #d7e2ea;
+  --color-ink-muted: #8a9aa8;
+  --color-coral: #ffb000;
+  --color-coral-deep: #ffb000;
+  --color-lavender-pale: #111821;
+  --color-celadon-pale: #111821;
+  --color-gold-pale: #111821;
+  --sig: #ffb000;
+  --ok: #3ddc97;
+  --alert: #ff5f56;
+  --panel: #0b0f14;
+  background: #0b0f14;
+  color: #d7e2ea;
+}
+/* Type voices: the lab and the control room speak monospace, the sonic
+   universe sings in the serif. */
+[data-world='triscan-ai'] .display,
+[data-world='api-sentinel'] .display {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+}
+[data-world='naad-ai'] .display {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: -0.01em;
+}
+.world-page {
+  background: var(--color-paper);
+}
+
+/* The lab: a faint clinical grid and a turning sweep in the scope. */
+.lab-grid {
+  background:
+    linear-gradient(rgba(92, 255, 196, 0.06) 1px, transparent 1px) 0 0 / 48px 48px,
+    linear-gradient(90deg, rgba(92, 255, 196, 0.06) 1px, transparent 1px) 0 0 / 48px 48px;
+}
+.scope {
+  color: var(--sig, #5cffc4);
+}
+.scope-sweep {
+  background: conic-gradient(from 0deg, rgba(92, 255, 196, 0.35), transparent 18%, transparent);
+  mix-blend-mode: screen;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .scope-sweep {
+    animation: sweep 6s linear infinite;
+  }
+  .wire-flow {
+    animation: wire 1.6s linear infinite;
+  }
+  .caret {
+    animation: blink 1.1s steps(1) infinite;
+  }
+}
+@keyframes sweep {
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes wire {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+.node:focus-visible {
+  outline: 2px solid var(--sig);
+  outline-offset: 3px;
+}
+
+/* ===============================================================
+   The Unfinished Universe
+   =============================================================== */
+.assemble {
+  transition:
+    transform 1s var(--ease-editorial),
+    opacity 0.8s var(--ease-editorial),
+    filter 0.9s var(--ease-editorial);
+}
+@media (prefers-reduced-motion: reduce) {
+  .assemble {
+    transition: none;
+  }
+}
+.site-header {
+  transition:
+    background-color 0.5s,
+    color 0.5s;
+}
+/* The Infinite Room: a floor and a ceiling receding to one vanishing line. */
+.room {
+  perspective: 600px;
+  perspective-origin: 50% 50%;
+}
+.room-plane {
+  position: absolute;
+  left: -50%;
+  width: 200%;
+  height: 60%;
+  background-image:
+    linear-gradient(rgba(198, 244, 50, 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(220, 223, 245, 0.12) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+.room-floor {
+  bottom: -10%;
+  transform: rotateX(78deg);
+  transform-origin: 50% 0%;
+  top: 50%;
+  mask-image: linear-gradient(to bottom, transparent, #000 40%);
+}
+.room-ceiling {
+  top: -10%;
+  height: 60%;
+  transform: rotateX(-78deg);
+  transform-origin: 50% 100%;
+  bottom: 50%;
+  mask-image: linear-gradient(to top, transparent, #000 40%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .room-floor,
+  .room-ceiling {
+    animation: room-flow 4s linear infinite;
+  }
+}
+@keyframes room-flow {
+  to {
+    background-position: 0 80px;
+  }
+}
+.door:focus-visible {
+  outline: 2px solid #c6f432;
+  outline-offset: 8px;
+}
+
+/* ---- Exhibit rooms: three layouts, not three colourways ---- */
+/* Signal Room (TriScan): a lab report. Labels become specimen tags on a
+   measured rail, blocks sit on a ruled grid. */
+@media (min-width: 768px) {
+  [data-world='triscan-ai'] .cs-block {
+    background-image: linear-gradient(to right, color-mix(in srgb, var(--sig) 14%, transparent) 1px, transparent 1px);
+    background-size: calc(100% / 12) 100%;
+  }
+}
+[data-world='triscan-ai'] .cs-label {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  border-left: 2px solid var(--sig);
+  padding-left: 0.75rem;
+}
+[data-world='triscan-ai'] .cs-label::before {
+  content: 'SPECIMEN · ';
+  color: var(--sig);
+}
+
+/* Frequency Room (Naad): one centred serif column, like liner notes. */
+[data-world='naad-ai'] .cs-block {
+  display: block;
+  max-width: 46rem;
+  margin-inline: auto;
+  border-top: 0;
+  text-align: left;
+}
+[data-world='naad-ai'] .cs-label {
+  position: static;
+  display: block;
+  text-align: center;
+  font-family: var(--font-serif, Georgia, serif);
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 1.6rem;
+  margin-bottom: 1.5rem;
+  color: var(--color-ink);
+}
+[data-world='naad-ai'] .cs-label::after {
+  content: '';
+  display: block;
+  width: 3rem;
+  height: 1px;
+  margin: 0.9rem auto 0;
+  background: var(--sig);
+}
+[data-world='naad-ai'] .cs-body {
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: 1.08rem;
+}
+
+/* Control Room (API Sentinel): every block is a terminal panel. */
+[data-world='api-sentinel'] .cs-block {
+  border: 1px solid color-mix(in srgb, var(--sig) 30%, transparent);
+  background: color-mix(in srgb, var(--color-paper) 85%, #000);
+  margin-block: 1.25rem;
+  padding: 1.25rem;
+  border-radius: 4px;
+}
+@media (min-width: 768px) {
+  [data-world='api-sentinel'] .cs-block { padding: 2rem; }
+}
+[data-world='api-sentinel'] .cs-label {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  color: var(--sig);
+  text-transform: lowercase;
+}
+[data-world='api-sentinel'] .cs-label::before {
+  content: '> ';
+}
+[data-world='api-sentinel'] .cs-body {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.92rem;
+}
+
+/* Elsewhere: record sleeves that turn over */
+.sleeve-card { transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.sleeve-face { backface-visibility: hidden; box-shadow: 0 20px 40px -20px rgb(0 0 0 / 0.6); }
+.sleeve-back { transform: rotateY(180deg); }
+.sleeve.is-flipped .sleeve-card { transform: rotateY(180deg); }
+.sleeve:focus-visible { outline: 2px solid #ffb4a2; outline-offset: 6px; }
+@media (min-width: 768px) {
+  .sleeve-slot { transform: rotate(calc((var(--i) - 2.5) * 1.6deg)); transition: transform 0.5s; }
+  .sleeve-slot:hover { transform: translateY(-14px) rotate(0deg); }
+}
+.grain { position: relative; }
+.grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (prefers-reduced-motion: reduce) {
+  .sleeve-card, .sleeve-slot { transition: none; }
+}
+[data-world='triscan-ai'] .cs-body > p.display,
+[data-world='api-sentinel'] .cs-body > p.display {
+  font-size: clamp(1.35rem, 2.2vw, 1.9rem);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}

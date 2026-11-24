@@ -1,0 +1,24 @@
+{
+  // Run from VS Code: Terminal > Run Task... > "Start website".
+  // Uses Command Prompt so PowerShell's script policy can't block npm.
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start website",
+      "type": "shell",
+      "command": "node -v && npm install && npm run dev -- --open",
+      "options": { "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] } },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    },
+    {
+      "label": "Build website (production)",
+      "type": "shell",
+      "command": "npm install && npm run build",
+      "options": { "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] } },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    }
+  ]
+}
