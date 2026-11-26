@@ -405,9 +405,9 @@ export const projects: Project[] = [
       },
       { value: '100', label: 'Lighthouse accessibility score', measuredOn: 'Lighthouse, mobile' },
       {
-        value: '886',
+        value: '860+',
         label: 'Unit tests (Vitest), all passing, plus end-to-end flows in Chrome',
-        measuredOn: 'Full test suite run on the 20 Nov 2026 commit (010b9e9)',
+        measuredOn: 'Full test suite in GitHub Actions',
       },
     ],
     roles: ['frontend', 'fullstack', 'product', 'qa'],
@@ -451,7 +451,7 @@ export const projects: Project[] = [
       img('naad-ai', 5, 'Riyaz with tanpura and taal on a phone', 780, 1688),
     ],
     todo: [
-      '886 Vitest tests measured on commit 010b9e9 (20 Nov 2026). Resume says 861 and docs/case-study.md says 440+: update both to match.',
+      'Shown as 860+ to match the resume (861). Latest full run counted 886 (commit 010b9e9, 20 Nov 2026); docs/case-study.md still says 440+.',
     ],
   },
   {
