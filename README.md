@@ -82,3 +82,7 @@ Why Vercel: links such as `/brief` or `/work/api-sentinel` are served with a nor
 3. If you use a different repository name, the site lives at `github.io/<repo>/`; set `base: '/<repo>/'` in `vite.config.ts`.
 
 Note: `public/Anindita_Mondal_Resume.pdf` is public once deployed, and it includes your phone number.
+
+## Licence
+
+Code: MIT (see [LICENSE](LICENSE)). Text, photos and resume © Anindita Mondal, all rights reserved.
